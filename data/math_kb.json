@@ -1,0 +1,319 @@
+{
+  "curriculum": [
+    {
+      "grade": 1,
+      "topics": [
+        {
+          "name": "Addition within 20",
+          "concepts": ["Adding single digits", "Counting on", "Making ten", "Doubles"],
+          "examples": [
+            {"question": "I have 5 apples and my friend gives me 3 more. How many apples do I have now?", "answer": "8", "explanation": "5 + 3 = 8"},
+            {"question": "There are 7 ducks in the pond and 6 more swim over. How many ducks are there?", "answer": "13", "explanation": "7 + 6 = 13"},
+            {"question": "You find 9 seashells on the beach, then 4 more. How many seashells do you have?", "answer": "13", "explanation": "9 + 4 = 13"},
+            {"question": "A hen has 8 eggs. She lays 5 more. How many eggs are there now?", "answer": "13", "explanation": "8 + 5 = 13"}
+          ]
+        },
+        {
+          "name": "Subtraction within 20",
+          "concepts": ["Taking away", "Counting back", "Finding the difference", "Missing number"],
+          "examples": [
+            {"question": "There are 10 birds on a branch. 4 fly away. How many are left?", "answer": "6", "explanation": "10 - 4 = 6"},
+            {"question": "You have 15 crayons and give away 7. How many do you keep?", "answer": "8", "explanation": "15 - 7 = 8"},
+            {"question": "A dog had 12 bones and buried 5. How many bones does the dog still have?", "answer": "7", "explanation": "12 - 5 = 7"},
+            {"question": "There were 18 butterflies. 9 flew away. How many are still here?", "answer": "9", "explanation": "18 - 9 = 9"}
+          ]
+        },
+        {
+          "name": "Counting and Number Sense",
+          "concepts": ["Counting to 100", "Skip counting by 2s, 5s, 10s", "Comparing numbers", "Ordering numbers"],
+          "examples": [
+            {"question": "What number comes after 29?", "answer": "30", "explanation": "29 + 1 = 30"},
+            {"question": "Which is bigger: 14 or 9?", "answer": "14", "explanation": "14 is greater than 9"},
+            {"question": "Count by 5s: 5, 10, 15, ___. What comes next?", "answer": "20", "explanation": "The pattern is +5, so 15 + 5 = 20"},
+            {"question": "Count by 2s: 2, 4, 6, 8, ___. What comes next?", "answer": "10", "explanation": "The pattern is +2, so 8 + 2 = 10"}
+          ]
+        },
+        {
+          "name": "Shapes and Geometry",
+          "concepts": ["Circle", "Square", "Triangle", "Rectangle", "Sides and corners"],
+          "examples": [
+            {"question": "Which shape has 3 sides and 3 corners?", "answer": "triangle", "explanation": "A triangle has three sides and three vertices."},
+            {"question": "How many sides does a rectangle have?", "answer": "4", "explanation": "A rectangle has 4 sides."},
+            {"question": "A stop sign is shaped like an octagon. How many sides does it have?", "answer": "8", "explanation": "An octagon has 8 sides."}
+          ]
+        },
+        {
+          "name": "Measurement and Length",
+          "concepts": ["Longer and shorter", "Measuring with units", "Comparing lengths"],
+          "examples": [
+            {"question": "A pencil is 7 inches long and a crayon is 4 inches long. How much longer is the pencil?", "answer": "3", "explanation": "7 - 4 = 3 inches longer"},
+            {"question": "A ribbon is 6 inches. Another ribbon is 8 inches. How long are they together?", "answer": "14", "explanation": "6 + 8 = 14 inches"},
+            {"question": "You measure a book at 10 inches and a notebook at 7 inches. What is the difference?", "answer": "3", "explanation": "10 - 7 = 3 inches"}
+          ]
+        },
+        {
+          "name": "Word Problems with Objects",
+          "concepts": ["Story problems", "Adding groups", "Taking from groups"],
+          "examples": [
+            {"question": "You have 6 red balloons and 5 blue balloons. How many balloons in total?", "answer": "11", "explanation": "6 + 5 = 11"},
+            {"question": "A basket has 14 strawberries. You eat 6. How many are left?", "answer": "8", "explanation": "14 - 6 = 8"},
+            {"question": "3 children each have 2 cookies. How many cookies are there altogether?", "answer": "6", "explanation": "3 + 3 = 6 or 3 groups of 2 = 6"}
+          ]
+        }
+      ]
+    },
+    {
+      "grade": 2,
+      "topics": [
+        {
+          "name": "Addition within 100",
+          "concepts": ["Place value", "Regrouping", "Two-digit addition", "Adding with carrying"],
+          "examples": [
+            {"question": "Sarah has 25 stickers and buys 18 more. How many stickers does she have?", "answer": "43", "explanation": "25 + 18 = 43"},
+            {"question": "A farmer has 37 chickens and buys 26 more. How many chickens now?", "answer": "63", "explanation": "37 + 26 = 63"},
+            {"question": "You read 45 pages on Monday and 38 pages on Tuesday. How many pages total?", "answer": "83", "explanation": "45 + 38 = 83"},
+            {"question": "A store sold 29 toys in the morning and 34 in the afternoon. How many sold in total?", "answer": "63", "explanation": "29 + 34 = 63"}
+          ]
+        },
+        {
+          "name": "Subtraction within 100",
+          "concepts": ["Two-digit subtraction", "Borrowing/regrouping", "Checking with addition"],
+          "examples": [
+            {"question": "There are 72 flowers in a garden. 35 are picked. How many remain?", "answer": "37", "explanation": "72 - 35 = 37"},
+            {"question": "A bus has 50 passengers. 23 get off at the next stop. How many are still on the bus?", "answer": "27", "explanation": "50 - 23 = 27"},
+            {"question": "You have 81 marbles and lose 47. How many do you have left?", "answer": "34", "explanation": "81 - 47 = 34"}
+          ]
+        },
+        {
+          "name": "Money",
+          "concepts": ["Quarters", "Dimes", "Nickels", "Pennies", "Making change"],
+          "examples": [
+            {"question": "If you have 2 quarters and 1 dime, how many cents do you have?", "answer": "60", "explanation": "25 + 25 + 10 = 60"},
+            {"question": "A toy costs 75 cents. You pay with 1 dollar. How much change do you get?", "answer": "25", "explanation": "100 - 75 = 25 cents"},
+            {"question": "You have 3 dimes and 4 nickels. How many cents is that?", "answer": "50", "explanation": "30 + 20 = 50 cents"},
+            {"question": "An eraser costs 35 cents. You have 2 quarters. How much change will you get?", "answer": "15", "explanation": "50 - 35 = 15 cents"}
+          ]
+        },
+        {
+          "name": "Time",
+          "concepts": ["Reading clocks", "O'clock", "Half-past", "Quarter-past", "Minutes"],
+          "examples": [
+            {"question": "School starts at 8 o'clock and ends 6 hours later. What time does school end?", "answer": "2", "explanation": "8 + 6 = 14, or 2 o'clock PM"},
+            {"question": "It is 3:00 now. What time will it be in 2 hours?", "answer": "5", "explanation": "3 + 2 = 5 o'clock"},
+            {"question": "Lunch is 30 minutes long. If it starts at 12:00, what time does it end? Give just the minutes.", "answer": "30", "explanation": "12:00 + 30 minutes = 12:30"}
+          ]
+        },
+        {
+          "name": "Skip Counting and Patterns",
+          "concepts": ["Skip counting by 2s, 5s, 10s", "Even and odd numbers", "Number patterns"],
+          "examples": [
+            {"question": "Skip count by 5: 10, 15, 20, 25, ___. What is the next number?", "answer": "30", "explanation": "25 + 5 = 30"},
+            {"question": "Skip count by 10: 30, 40, 50, ___. What comes next?", "answer": "60", "explanation": "50 + 10 = 60"},
+            {"question": "What is the pattern? 4, 8, 12, 16, ___. What is the next number?", "answer": "20", "explanation": "The pattern is +4, so 16 + 4 = 20"},
+            {"question": "Is 15 even or odd? How many groups of 2 can you make? What's left over?", "answer": "1", "explanation": "15 ÷ 2 = 7 groups with 1 left over. 15 is odd."}
+          ]
+        },
+        {
+          "name": "Measurement",
+          "concepts": ["Inches and feet", "Centimeters and meters", "Measuring with rulers", "Estimating length"],
+          "examples": [
+            {"question": "A desk is 3 feet long. How many inches is that?", "answer": "36", "explanation": "3 × 12 = 36 inches (1 foot = 12 inches)"},
+            {"question": "A rope is 48 inches long. How many feet is that?", "answer": "4", "explanation": "48 ÷ 12 = 4 feet"},
+            {"question": "You cut a 20-inch ribbon in half. How long is each piece?", "answer": "10", "explanation": "20 ÷ 2 = 10 inches"}
+          ]
+        }
+      ]
+    },
+    {
+      "grade": 3,
+      "topics": [
+        {
+          "name": "Multiplication Facts",
+          "concepts": ["Equal groups", "Arrays", "Multiplication tables 0-10", "Commutative property"],
+          "examples": [
+            {"question": "A box has 6 rows of cupcakes, and each row has 4 cupcakes. How many cupcakes in total?", "answer": "24", "explanation": "6 × 4 = 24"},
+            {"question": "There are 8 bags with 5 oranges in each. How many oranges altogether?", "answer": "40", "explanation": "8 × 5 = 40"},
+            {"question": "A classroom has 7 tables with 3 chairs at each table. How many chairs total?", "answer": "21", "explanation": "7 × 3 = 21"},
+            {"question": "A spider has 8 legs. How many legs do 9 spiders have?", "answer": "72", "explanation": "9 × 8 = 72"}
+          ]
+        },
+        {
+          "name": "Division Basics",
+          "concepts": ["Equal sharing", "Grouping", "Relationship to multiplication", "Remainders intro"],
+          "examples": [
+            {"question": "24 cookies are shared equally among 6 friends. How many does each friend get?", "answer": "4", "explanation": "24 ÷ 6 = 4"},
+            {"question": "A farmer puts 35 eggs into cartons of 5. How many cartons does he need?", "answer": "7", "explanation": "35 ÷ 5 = 7"},
+            {"question": "You have 18 stickers to divide equally among 3 children. How many does each get?", "answer": "6", "explanation": "18 ÷ 3 = 6"},
+            {"question": "There are 42 students split into teams of 7. How many teams are there?", "answer": "6", "explanation": "42 ÷ 7 = 6"}
+          ]
+        },
+        {
+          "name": "Fractions Introduction",
+          "concepts": ["Numerator", "Denominator", "Unit fractions", "Fractions on a number line", "Equivalent fractions"],
+          "examples": [
+            {"question": "If a pizza is cut into 4 equal slices and you eat 1, what fraction did you eat?", "answer": "1/4", "explanation": "1 slice out of 4 total equal slices."},
+            {"question": "A chocolate bar has 8 equal pieces. You eat 3. What fraction did you eat?", "answer": "3/8", "explanation": "3 pieces out of 8 total pieces."},
+            {"question": "Which is bigger: 1/3 or 1/6 of the same cake?", "answer": "1/3", "explanation": "When the whole is the same, fewer pieces means bigger pieces. 1/3 > 1/6."},
+            {"question": "A rope is 12 meters long. You use 1/4 of it. How many meters did you use?", "answer": "3", "explanation": "12 ÷ 4 = 3 meters"}
+          ]
+        },
+        {
+          "name": "Area and Perimeter",
+          "concepts": ["Area as covering", "Counting square units", "Perimeter as distance around"],
+          "examples": [
+            {"question": "A rug is 5 feet long and 3 feet wide. What is its area in square feet?", "answer": "15", "explanation": "Area = 5 × 3 = 15 square feet"},
+            {"question": "A garden is 8 meters long and 4 meters wide. What is its perimeter?", "answer": "24", "explanation": "Perimeter = 2 × (8 + 4) = 24 meters"},
+            {"question": "A square table has sides of 6 feet. What is its perimeter?", "answer": "24", "explanation": "Perimeter = 4 × 6 = 24 feet"},
+            {"question": "A poster is 7 inches long and 4 inches wide. What is its area?", "answer": "28", "explanation": "Area = 7 × 4 = 28 square inches"}
+          ]
+        },
+        {
+          "name": "Telling Time",
+          "concepts": ["Reading to the minute", "Elapsed time", "AM and PM", "Intervals of time"],
+          "examples": [
+            {"question": "A movie starts at 2:15 and ends at 4:15. How many hours long is the movie?", "answer": "2", "explanation": "From 2:15 to 4:15 is 2 hours."},
+            {"question": "It takes 45 minutes to bake a cake. You start at 3:00. What time will it be done? Just give the minutes.", "answer": "45", "explanation": "3:00 + 45 minutes = 3:45"},
+            {"question": "School starts at 8:30 and recess is at 10:00. How many minutes until recess?", "answer": "90", "explanation": "30 min to 9:00 + 60 min to 10:00 = 90 minutes"}
+          ]
+        },
+        {
+          "name": "Word Problems (Multi-step)",
+          "concepts": ["Two-step problems", "Choosing operations", "Checking reasonableness"],
+          "examples": [
+            {"question": "You buy 3 books at $4 each and pay with a $20 bill. How much change do you get?", "answer": "8", "explanation": "3 × 4 = 12, then 20 - 12 = 8 dollars change"},
+            {"question": "A baker makes 48 muffins and puts 6 in each box. He sells 5 boxes. How many muffins did he sell?", "answer": "30", "explanation": "5 × 6 = 30 muffins"},
+            {"question": "You have 50 beads. You use 12 for a necklace and 8 for a bracelet. How many are left?", "answer": "30", "explanation": "50 - 12 - 8 = 30 beads"}
+          ]
+        }
+      ]
+    },
+    {
+      "grade": 4,
+      "topics": [
+        {
+          "name": "Multi-digit Multiplication",
+          "concepts": ["Standard algorithm", "Multiplying by 10s and 100s", "Estimating products", "Area model"],
+          "examples": [
+            {"question": "What is 125 multiplied by 4?", "answer": "500", "explanation": "125 × 4 = 500"},
+            {"question": "A theater has 24 rows with 15 seats each. How many seats total?", "answer": "360", "explanation": "24 × 15 = 360"},
+            {"question": "A factory makes 230 toys per day. How many toys in 3 days?", "answer": "690", "explanation": "230 × 3 = 690"},
+            {"question": "What is 56 × 7?", "answer": "392", "explanation": "56 × 7 = 392"}
+          ]
+        },
+        {
+          "name": "Long Division",
+          "concepts": ["Dividing multi-digit numbers", "Remainders", "Checking with multiplication"],
+          "examples": [
+            {"question": "156 students are divided into teams of 12. How many teams are there?", "answer": "13", "explanation": "156 ÷ 12 = 13"},
+            {"question": "A baker has 245 cookies to pack in boxes of 5. How many boxes does she need?", "answer": "49", "explanation": "245 ÷ 5 = 49"},
+            {"question": "What is 84 divided by 7?", "answer": "12", "explanation": "84 ÷ 7 = 12"},
+            {"question": "A road is 648 miles long. A truck drives 8 miles per hour. How many hours to complete the journey?", "answer": "81", "explanation": "648 ÷ 8 = 81 hours"}
+          ]
+        },
+        {
+          "name": "Fractions and Equivalence",
+          "concepts": ["Equivalent fractions", "Comparing fractions", "Adding fractions with like denominators", "Mixed numbers"],
+          "examples": [
+            {"question": "What fraction is equivalent to 2/4?", "answer": "1/2", "explanation": "2/4 simplified is 1/2 (divide both by 2)"},
+            {"question": "Add: 3/8 + 2/8 = ?", "answer": "5/8", "explanation": "Same denominator: 3 + 2 = 5, so 5/8"},
+            {"question": "Which is larger: 3/5 or 2/5?", "answer": "3/5", "explanation": "Same denominator, so compare numerators: 3 > 2"},
+            {"question": "A pie is cut into 6 slices. You eat 2 and your friend eats 1. What fraction is eaten?", "answer": "3/6", "explanation": "2 + 1 = 3 slices eaten out of 6, which is 3/6 or 1/2"}
+          ]
+        },
+        {
+          "name": "Decimals",
+          "concepts": ["Tenths", "Hundredths", "Decimal notation", "Comparing decimals", "Decimal and fraction connection"],
+          "examples": [
+            {"question": "Write 7/10 as a decimal.", "answer": "0.7", "explanation": "7 tenths is 0.7"},
+            {"question": "Which is larger: 0.6 or 0.45?", "answer": "0.6", "explanation": "0.6 = 0.60, which is greater than 0.45"},
+            {"question": "What is 0.3 + 0.4?", "answer": "0.7", "explanation": "3 tenths + 4 tenths = 7 tenths = 0.7"},
+            {"question": "Write 25/100 as a decimal.", "answer": "0.25", "explanation": "25 hundredths = 0.25"}
+          ]
+        },
+        {
+          "name": "Area and Perimeter Advanced",
+          "concepts": ["Composite shapes", "Missing side lengths", "Real-world applications"],
+          "examples": [
+            {"question": "A rectangular field is 120 meters long and 45 meters wide. What is its perimeter?", "answer": "330", "explanation": "Perimeter = 2 × (120 + 45) = 2 × 165 = 330 meters"},
+            {"question": "A room is 12 feet by 10 feet. How many square feet of carpet do you need?", "answer": "120", "explanation": "Area = 12 × 10 = 120 square feet"},
+            {"question": "A square park has a perimeter of 200 meters. How long is each side?", "answer": "50", "explanation": "200 ÷ 4 = 50 meters per side"}
+          ]
+        },
+        {
+          "name": "Factors and Multiples",
+          "concepts": ["Finding factors", "Common multiples", "Prime and composite numbers"],
+          "examples": [
+            {"question": "What is the smallest number that is a multiple of both 4 and 6?", "answer": "12", "explanation": "Multiples of 4: 4, 8, 12... Multiples of 6: 6, 12... LCM = 12"},
+            {"question": "How many factors does 18 have?", "answer": "6", "explanation": "Factors of 18: 1, 2, 3, 6, 9, 18 = 6 factors"},
+            {"question": "Is 7 prime or composite? Answer with just the number of factors it has.", "answer": "2", "explanation": "7 has only 2 factors (1 and 7), so it is prime."},
+            {"question": "List all factors of 12. How many are there?", "answer": "6", "explanation": "Factors of 12: 1, 2, 3, 4, 6, 12 = 6 factors"}
+          ]
+        }
+      ]
+    },
+    {
+      "grade": 5,
+      "topics": [
+        {
+          "name": "Operations with Fractions",
+          "concepts": ["Adding unlike fractions", "Subtracting fractions", "Multiplying fractions", "Fraction of a number"],
+          "examples": [
+            {"question": "What is 1/2 + 1/4?", "answer": "3/4", "explanation": "1/2 = 2/4. 2/4 + 1/4 = 3/4."},
+            {"question": "What is 3/4 - 1/3?", "answer": "5/12", "explanation": "3/4 = 9/12, 1/3 = 4/12. 9/12 - 4/12 = 5/12."},
+            {"question": "What is 2/3 × 6?", "answer": "4", "explanation": "2/3 × 6 = 12/3 = 4"},
+            {"question": "What is 1/2 × 3/4?", "answer": "3/8", "explanation": "Multiply numerators (1×3=3) and denominators (2×4=8) = 3/8"}
+          ]
+        },
+        {
+          "name": "Decimal Operations",
+          "concepts": ["Adding decimals", "Subtracting decimals", "Multiplying decimals", "Dividing decimals"],
+          "examples": [
+            {"question": "What is 3.5 + 2.75?", "answer": "6.25", "explanation": "3.50 + 2.75 = 6.25"},
+            {"question": "A shirt costs $12.50 and you have $20. How much change do you get?", "answer": "7.5", "explanation": "20.00 - 12.50 = 7.50"},
+            {"question": "What is 0.6 × 5?", "answer": "3", "explanation": "0.6 × 5 = 3.0"},
+            {"question": "What is 4.8 ÷ 4?", "answer": "1.2", "explanation": "4.8 ÷ 4 = 1.2"}
+          ]
+        },
+        {
+          "name": "Volume",
+          "concepts": ["Cubic units", "Rectangular prisms", "Composite volumes", "Real-world volume"],
+          "examples": [
+            {"question": "A box is 5cm long, 3cm wide, and 2cm high. What is its volume?", "answer": "30", "explanation": "Volume = 5 × 3 × 2 = 30 cubic cm"},
+            {"question": "An aquarium is 10 inches long, 8 inches wide, and 6 inches high. What is its volume?", "answer": "480", "explanation": "Volume = 10 × 8 × 6 = 480 cubic inches"},
+            {"question": "A cube has sides of 4 cm. What is its volume?", "answer": "64", "explanation": "Volume = 4 × 4 × 4 = 64 cubic cm"},
+            {"question": "A storage container is 12 ft long, 5 ft wide, and 3 ft high. What is its volume?", "answer": "180", "explanation": "Volume = 12 × 5 × 3 = 180 cubic ft"}
+          ]
+        },
+        {
+          "name": "Order of Operations",
+          "concepts": ["PEMDAS/BODMAS", "Parentheses first", "Multiply before add", "Multi-step expressions"],
+          "examples": [
+            {"question": "What is 3 + 4 × 2?", "answer": "11", "explanation": "Multiply first: 4 × 2 = 8, then 3 + 8 = 11"},
+            {"question": "What is (5 + 3) × 2?", "answer": "16", "explanation": "Parentheses first: 5 + 3 = 8, then 8 × 2 = 16"},
+            {"question": "What is 20 - 3 × 4?", "answer": "8", "explanation": "Multiply first: 3 × 4 = 12, then 20 - 12 = 8"},
+            {"question": "What is (10 - 4) × (2 + 1)?", "answer": "18", "explanation": "Parentheses: 6 × 3 = 18"}
+          ]
+        },
+        {
+          "name": "Coordinate Graphing",
+          "concepts": ["X and Y axes", "Ordered pairs", "Plotting points", "Reading coordinates"],
+          "examples": [
+            {"question": "A point is at (3, 5). What is its x-coordinate?", "answer": "3", "explanation": "In (x, y), the first number is x = 3"},
+            {"question": "If you move 4 units right and 2 units up from the origin, what are your coordinates? Give the x value.", "answer": "4", "explanation": "Starting at (0,0), move right 4 = x is 4, up 2 = y is 2. Coordinates: (4, 2)"},
+            {"question": "A treasure is at (7, 3). How far right from the origin is it?", "answer": "7", "explanation": "The x-coordinate tells horizontal distance: 7 units right"}
+          ]
+        },
+        {
+          "name": "Patterns and Sequences",
+          "concepts": ["Arithmetic sequences", "Rule-based patterns", "Input-output tables", "Generating terms"],
+          "examples": [
+            {"question": "The pattern rule is 'multiply by 2'. Starting at 3: 3, 6, 12, ___. What comes next?", "answer": "24", "explanation": "12 × 2 = 24"},
+            {"question": "The rule is 'add 7'. Starting at 2: 2, 9, 16, 23, ___. What comes next?", "answer": "30", "explanation": "23 + 7 = 30"},
+            {"question": "If the rule is 'subtract 3': 30, 27, 24, 21, ___. What comes next?", "answer": "18", "explanation": "21 - 3 = 18"},
+            {"question": "A function takes an input and adds 5 then doubles it. If the input is 3, what is the output?", "answer": "16", "explanation": "(3 + 5) × 2 = 8 × 2 = 16"}
+          ]
+        }
+      ]
+    }
+  ]
+}

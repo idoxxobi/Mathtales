@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+
+# Build output
+build/
+dist/
+coverage/
+
+# Model files (large binaries — download via npm run download-model)
+models/*.gguf
+
+# Database (auto-generated at runtime)
+*.db
+*.db-wal
+*.db-shm
+
+# Environment
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*

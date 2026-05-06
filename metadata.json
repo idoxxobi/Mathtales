@@ -1,0 +1,6 @@
+{
+  "name": "MathTales: Interactive AI Stories",
+  "description": "An offline-first math learning app that uses small language models to generate interactive mathematical stories for Grades 1-5 with RAG capability.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
