@@ -102,13 +102,13 @@ async function startServer() {
     }
   }, 2 * 60 * 1000);
 
-  async function getOrCreateSession(studentId: string, theme: string, grade: number): Promise<SessionEntry> {
+  async function getOrCreateSession(studentId: string, theme: string, grade: number): Promise<{ entry: SessionEntry, isNew: boolean }> {
     const existing = sessionPool.get(studentId);
     // Reuse if same theme/grade and session is still valid
     if (existing && existing.theme === theme && existing.grade === grade) {
       existing.lastUsed = Date.now();
       console.log(`[session-pool] Reusing cached session for ${studentId}`);
-      return existing;
+      return { entry: existing, isNew: false };
     }
     // Dispose old session if theme/grade changed
     if (existing) {
@@ -118,14 +118,14 @@ async function startServer() {
     }
     // Create new session with system prompt baked in
     console.log(`[session-pool] Creating new session for ${studentId} (theme=${theme}, grade=${grade})`);
-    const ctx = await model.createContext({ contextSize: 2048 });
+    const ctx = await model.createContext({ contextSize: 4096 });
     const session = new LlamaChatSession({
       contextSequence: ctx.getSequence(),
       systemPrompt: buildSystemPrompt(theme, grade),
     });
     const entry: SessionEntry = { context: ctx, session, theme, grade, lastUsed: Date.now() };
     sessionPool.set(studentId, entry);
-    return entry;
+    return { entry, isNew: true };
   }
 
   function disposeSession(studentId: string) {
@@ -153,7 +153,7 @@ async function startServer() {
   });
 
   // --- Prefetch cache for background pre-generation ---
-  const prefetchCache = new Map<string, { text: string; ready: boolean; generating: boolean }>();
+  const prefetchCache = new Map<string, { text: string; ready: boolean; generating: boolean; abortController?: AbortController }>();
 
   // Diverse storytelling elements for prompt variety
   const narrativeStyles = [
@@ -200,42 +200,66 @@ async function startServer() {
     pirate: "the high seas with pirate ships, treasure maps, tropical islands, and sea monsters",
   };
 
+  // Grade-appropriate vocabulary and sentence complexity guidance
+  const gradeVocabulary: Record<number, string> = {
+    1: "Use very simple words a 6-year-old knows (said, went, big, little, happy, scared). Short sentences of 5-8 words. No complex words.",
+    2: "Use simple words a 7-year-old knows. Short sentences of 6-10 words. Basic describing words only.",
+    3: "Use words an 8-year-old knows. Sentences up to 12 words. Some describing words are OK.",
+    4: "Use words a 9-year-old knows. Compound sentences are OK. Richer vocabulary allowed.",
+    5: "Use words a 10-year-old knows. Natural prose with some figurative language. Moderate complexity.",
+  };
+
   // System prompt — sent ONCE when a session is created (stays in KV cache)
   function buildSystemPrompt(theme: string, grade: number): string {
     const themeDesc = themeDescriptions[theme] || `a world themed around: ${theme}`;
     const hook = uniqueHooks[Math.floor(Math.random() * uniqueHooks.length)];
+    const vocab = gradeVocabulary[grade] || gradeVocabulary[1];
 
-    return `You are a world-class children's author and math educator. You write highly imaginative, unique stories set in ${themeDesc}.
+    return `You are a children's storyteller and math teacher for Grade ${grade} students.
+You are telling ONE continuous adventure story set in ${themeDesc}.
 
 WORLD RULE: ${hook}
 
-Rules:
-- Cinematic, vivid, original. No cliches.
-- Math must be a PHYSICAL obstacle (unlock a door, fix a machine, cross a bridge).
-- Every turn: new character or twist.
-- 2-3 short paragraphs only.
-- End with:
-[HINT: strategy clue, NOT the answer]
-[ANSWER: number]`;
+LANGUAGE LEVEL: ${vocab}
+
+STORY RULES:
+1. This is ONE ongoing story with the SAME hero throughout.
+2. Each reply CONTINUES from where the last one ended — refer to what just happened.
+3. Introduce characters who may return later. Build on earlier events.
+4. Keep each reply SHORT — 3-5 sentences (under 100 words) of story, then the math challenge.
+5. The math challenge must feel like a natural part of the story (unlock a door, help a friend, cross a bridge).
+6. You MUST always end with ALL THREE of these tags:
+   [QUESTION: ask the math problem clearly as a simple question]
+   [HINT: a strategy clue, NOT the answer]
+   [ANSWER: just the number or value]
+7. NEVER skip the [QUESTION], [HINT], or [ANSWER] tags. They are REQUIRED.`;
   }
 
   // Turn prompt — lightweight, sent each turn (only this gets tokenized fresh)
-  function buildTurnPrompt(userAction: string, ragSection: string, grade: number): string {
-    const style = narrativeStyles[Math.floor(Math.random() * narrativeStyles.length)];
+  function buildTurnPrompt(userAction: string, ragSection: string, grade: number, storySoFar?: string): string {
     const problemTypes = mathProblemTypes[grade] || mathProblemTypes[1];
     const chosenProblemType = problemTypes[Math.floor(Math.random() * problemTypes.length)];
 
-    return `Style: ${style}
-Hero's action: "${userAction}"
-Math type: ${chosenProblemType}
-${ragSection}
+    let recap = '';
+    if (storySoFar && storySoFar.trim()) {
+      recap = `\nStory so far (continue from here, do NOT repeat):\n${storySoFar}\n`;
+    }
 
-Continue the story (2-3 paragraphs). New obstacle requiring ${chosenProblemType}. End with [HINT: ...] and [ANSWER: ...].`;
+    return `Hero's action: "${userAction}"
+Math type: ${chosenProblemType}
+${ragSection}${recap}
+CONTINUE the story from where it left off. What happens NEXT? (10-15 sentences, under 300 words).
+Introduce a new ${chosenProblemType} challenge that fits naturally into the ongoing plot.
+
+You MUST end with:
+[QUESTION: the math problem as a clear, simple question]
+[HINT: a clue to help solve it]
+[ANSWER: the correct answer]`;
   }
 
   // Legacy full prompt (used for mock LLM and logging)
   function buildFullPrompt(context: any, userAction: string, ragSection: string, theme: string): string {
-    return `${buildSystemPrompt(theme, context.grade || 1)}\n\n${buildTurnPrompt(userAction, ragSection, context.grade || 1)}`;
+    return `${buildSystemPrompt(theme, context.grade || 1)}\n\n${buildTurnPrompt(userAction, ragSection, context.grade || 1, context.history)}`;
   }
 
   function getRagSection(studentId: string, useRag: boolean): string {
@@ -254,7 +278,7 @@ Use this topic naturally in the story challenge. Do NOT repeat the example verba
 
   // Story generation — SSE streaming endpoint
   app.post("/api/story/stream", async (req, res) => {
-    const { studentId, userAction, useRag, context } = req.body;
+    const { studentId, userAction, useRag, useThinking, context } = req.body;
     const startTime = Date.now();
 
     // Check if we have a prefetched response ready
@@ -274,13 +298,15 @@ Use this topic naturally in the story challenge. Do NOT repeat the example verba
       }
       const latency = Date.now() - startTime;
 
-      // Parse hint and answer from cached text
+      // Parse question, hint and answer from cached text
+      const questionMatch = cached.text.match(/\[QUESTION:\s*(.*?)\]/i);
       const hintMatch = cached.text.match(/\[HINT:\s*(.*?)\]/i);
-      const answerMatch = cached.text.match(/\[ANSWER:\s*([\w\/\.\-]+)\]/i);
+      const answerMatch = cached.text.match(/\[ANSWER:\s*(.*?)\]/i);
 
       res.write(`data: ${JSON.stringify({
         type: "done",
         latency,
+        question: questionMatch ? questionMatch[1] : null,
         hint: hintMatch ? hintMatch[1] : null,
         answer: answerMatch ? answerMatch[1] : null
       })}\n\n`);
@@ -288,7 +314,12 @@ Use this topic naturally in the story challenge. Do NOT repeat the example verba
       db.prepare("INSERT INTO model_logs (prompt, response, is_rag, latency) VALUES (?, ?, ?, ?)").run("[prefetched]", cached.text, useRag ? 1 : 0, latency);
       return;
     }
-    // Clear any stale cache
+    // Clear any stale cache and abort active prefetch
+    const existingPrefetch = prefetchCache.get(studentId);
+    if (existingPrefetch && existingPrefetch.generating && existingPrefetch.abortController) {
+      console.log(`[prefetch] Aborting active prefetch for ${studentId} because user started a new turn`);
+      existingPrefetch.abortController.abort();
+    }
     prefetchCache.delete(studentId);
 
     // Set SSE headers
@@ -301,17 +332,23 @@ Use this topic naturally in the story challenge. Do NOT repeat the example verba
     const theme = context.theme || "fantasy";
     const grade = context.grade || 1;
     const ragSection = getRagSection(studentId, useRag);
-    const turnPrompt = buildTurnPrompt(userAction, ragSection, grade);
-
+    const storySoFar = context.history || '';
     let fullResponse = "";
+    let finalTurnPrompt = "";
+
+    // Configure thinking budget: 0 = disabled (faster), undefined = default (model decides)
+    const thinkingEnabled = useThinking !== false; // default true
+    const budgets = thinkingEnabled ? undefined : { thoughtTokens: 0 };
 
     if (model) {
       try {
-        const entry = await getOrCreateSession(studentId, theme, grade);
+        const { entry, isNew } = await getOrCreateSession(studentId, theme, grade);
+        finalTurnPrompt = buildTurnPrompt(userAction, ragSection, grade, isNew ? storySoFar : undefined);
 
-        const response = await entry.session.prompt(turnPrompt, {
+        const response = await entry.session.prompt(finalTurnPrompt, {
           temperature: 0.8,
-          maxTokens: 300,
+          maxTokens: 400,
+          budgets,
           onTextChunk(chunk: string) {
             fullResponse += chunk;
             res.write(`data: ${JSON.stringify({ type: "chunk", text: chunk })}\n\n`);
@@ -329,9 +366,10 @@ Use this topic naturally in the story challenge. Do NOT repeat the example verba
     } else {
       // Mock LLM — simulate streaming
       const mockStories = [
-        `Deep in the Whispering Woods, a tiny fox named Clover dashes across your path! She's carrying a scroll with strange markings. "Help me!" she squeaks. "The Bridge Keeper won't let me cross unless I count the golden acorns correctly. I collected 5 baskets with 3 acorns each. How many acorns do I have altogether?"\n\n[ANSWER: 15]`,
-        `You stumble upon a bubbling brook where an old turtle named Captain Sheldon is stuck. "My raft needs exactly the right number of logs to float!" he grumbles. "I have 12 logs but the river carried away 4. How many logs do I have left to build with?"\n\n[ANSWER: 8]`,
-        `A shooting star crashes into the meadow ahead! When the dust settles, you find a baby dragon named Ember, counting her glittering scales. "Oh no, some fell off during my landing! I had 20 scales and lost 7. Can you tell me how many I have now? I need to know before I can fly again!"\n\n[ANSWER: 13]`,
+        `A tiny fox named Clover runs up to you. "Help!" she squeaks. "I need to cross the bridge! I have 5 baskets with 3 acorns each."\n\n[QUESTION: How many acorns does Clover have in total?]\n[HINT: Try counting by 3s five times, or think of 5 groups of 3]\n[ANSWER: 15]`,
+        `An old turtle named Sheldon is stuck by a brook. "My raft needs logs!" he says. "I had 12 logs but the river took 4 away."\n\n[QUESTION: How many logs does Sheldon have left?]\n[HINT: Start with 12 and take away 4]\n[ANSWER: 8]`,
+        `A baby dragon named Ember lands in the meadow. Some of her shiny scales fell off! "I had 20 scales but lost 7," she says sadly.\n\n[QUESTION: How many scales does Ember have now?]\n[HINT: Start at 20 and count back 7]\n[ANSWER: 13]`,
+        `You find a locked gate with a sign: "Add the magic stones to pass!" There are 9 red stones and 6 blue stones on the ground.\n\n[QUESTION: How many stones are there in all?]\n[HINT: Put the 9 and 6 together — try counting on from 9]\n[ANSWER: 15]`,
       ];
       const mockText = mockStories[Math.floor(Math.random() * mockStories.length)];
       const words = mockText.split(/((?<=\s))/);
@@ -344,24 +382,26 @@ Use this topic naturally in the story challenge. Do NOT repeat the example verba
 
     const latency = Date.now() - startTime;
 
+    const questionMatch = fullResponse.match(/\[QUESTION:\s*(.*?)\]/i);
     const hintMatch = fullResponse.match(/\[HINT:\s*(.*?)\]/i);
-    const answerMatch = fullResponse.match(/\[ANSWER:\s*([\w\/\.\-]+)\]/i);
+    const answerMatch = fullResponse.match(/\[ANSWER:\s*(.*?)\]/i);
 
     res.write(`data: ${JSON.stringify({
       type: "done",
       latency,
+      question: questionMatch ? questionMatch[1] : null,
       hint: hintMatch ? hintMatch[1] : null,
       answer: answerMatch ? answerMatch[1] : null
     })}\n\n`);
     res.end();
 
-    const logPrompt = model ? `[session-cached] ${turnPrompt.slice(0, 200)}...` : buildFullPrompt(context, userAction, ragSection, theme);
+    const logPrompt = model ? `[session-cached] ${finalTurnPrompt.slice(0, 200)}...` : buildFullPrompt(context, userAction, ragSection, theme);
     db.prepare("INSERT INTO model_logs (prompt, response, is_rag, latency) VALUES (?, ?, ?, ?)").run(logPrompt, fullResponse, useRag ? 1 : 0, latency);
   });
 
   // Background prefetch — starts generating next story step
   app.post("/api/story/prefetch", async (req, res) => {
-    const { studentId, useRag, context } = req.body;
+    const { studentId, useRag, useThinking, context } = req.body;
 
     // Don't prefetch if already generating
     const existing = prefetchCache.get(studentId);
@@ -373,7 +413,8 @@ Use this topic naturally in the story challenge. Do NOT repeat the example verba
       return res.json({ status: "no_model" });
     }
 
-    const entry = { text: "", ready: false, generating: true };
+    const abortController = new AbortController();
+    const entry = { text: "", ready: false, generating: true, abortController };
     prefetchCache.set(studentId, entry);
     res.json({ status: "started" });
 
@@ -381,13 +422,19 @@ Use this topic naturally in the story challenge. Do NOT repeat the example verba
     const theme = context.theme || "fantasy";
     const grade = context.grade || 1;
     const ragSection = getRagSection(studentId, useRag);
-    const turnPrompt = buildTurnPrompt("The hero solved the puzzle and continues onward.", ragSection, grade);
+    const storySoFar = context.history || '';
+    const thinkingEnabled = useThinking !== false;
+    const budgets = thinkingEnabled ? undefined : { thoughtTokens: 0 };
 
     try {
-      const sessionEntry = await getOrCreateSession(studentId, theme, grade);
-      const response = await sessionEntry.session.prompt(turnPrompt, {
+      const { entry: sessionEntry, isNew } = await getOrCreateSession(studentId, theme, grade);
+      const finalTurnPrompt = buildTurnPrompt("The hero solved the puzzle and continues onward.", ragSection, grade, isNew ? storySoFar : undefined);
+
+      const response = await sessionEntry.session.prompt(finalTurnPrompt, {
         temperature: 0.8,
-        maxTokens: 300,
+        maxTokens: 400,
+        budgets,
+        signal: abortController.signal,
         onTextChunk(chunk: string) {
           entry.text += chunk;
         },
@@ -396,9 +443,13 @@ Use this topic naturally in the story challenge. Do NOT repeat the example verba
       entry.ready = true;
       entry.generating = false;
       sessionEntry.lastUsed = Date.now();
-    } catch (err) {
-      prefetchCache.delete(studentId);
-      disposeSession(studentId);
+    } catch (err: any) {
+      if (err.name === 'AbortError') {
+        console.log(`[prefetch] Aborted prefetch for ${studentId}`);
+      } else {
+        prefetchCache.delete(studentId);
+        disposeSession(studentId);
+      }
     }
   });
 

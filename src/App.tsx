@@ -80,6 +80,7 @@ export default function App() {
   const [view, setView] = useState<'onboarding' | 'story' | 'dashboard' | 'oversight'>('onboarding');
   const [isLoading, setIsLoading] = useState(false);
   const [useRag, setUseRag] = useState(true);
+  const [useThinking, setUseThinking] = useState(true);
 
   // Persistence (Simulated login)
   useEffect(() => {
@@ -155,13 +156,13 @@ export default function App() {
         <AnimatePresence mode="wait">
           {view === 'onboarding' && <Onboarding key="onboarding" onComplete={fetchStudent} />}
           {view === 'dashboard' && student && <StudentDashboard key="dashboard" studentId={student.id} onBack={() => setView('story')} />}
-          {view === 'oversight' && student && <OversightPanel key="oversight" studentId={student.id} useRag={useRag} setUseRag={setUseRag} onBack={() => setView('story')} />}
+          {view === 'oversight' && student && <OversightPanel key="oversight" studentId={student.id} useRag={useRag} setUseRag={setUseRag} useThinking={useThinking} setUseThinking={setUseThinking} onBack={() => setView('story')} />}
         </AnimatePresence>
 
         {/* StorySession stays mounted so state is preserved */}
         {student && (
           <div style={{ display: view === 'story' ? 'block' : 'none' }}>
-            <StorySession student={student} useRag={useRag} onUpdateXP={(v) => setStudent(s => s ? { ...s, xp: s.xp + v } : null)} />
+            <StorySession student={student} useRag={useRag} useThinking={useThinking} onUpdateXP={(v) => setStudent(s => s ? { ...s, xp: s.xp + v } : null)} />
           </div>
         )}
       </main>
@@ -244,7 +245,7 @@ function Onboarding({ onComplete }: { onComplete: (id: string) => void }) {
   );
 }
 
-function StorySession({ student, useRag, onUpdateXP }: { student: Student, useRag: boolean, onUpdateXP: (v: number) => void }) {
+function StorySession({ student, useRag, useThinking, onUpdateXP }: { student: Student, useRag: boolean, useThinking: boolean, onUpdateXP: (v: number) => void }) {
   const [history, setHistory] = useState<string[]>([]);
   const [currentStep, setCurrentStep] = useState<string>('');
   const [userAnswer, setUserAnswer] = useState('');
@@ -257,6 +258,7 @@ function StorySession({ student, useRag, onUpdateXP }: { student: Student, useRa
   const [theme, setTheme] = useState('');
   const [customTheme, setCustomTheme] = useState('');
   const [currentHint, setCurrentHint] = useState<string | null>(null);
+  const [currentQuestion, setCurrentQuestion] = useState<string | null>(null);
   const [showHint, setShowHint] = useState(false);
   const streamTextRef = useRef('');
   const rafRef = useRef<number | null>(null);
@@ -274,12 +276,31 @@ function StorySession({ student, useRag, onUpdateXP }: { student: Student, useRa
   // Batched UI update — only updates DOM once per animation frame for smooth streaming
   const flushStreamText = useCallback(() => {
     const cleaned = streamTextRef.current
+      .replace(/\[QUESTION:.*?\]/gi, '')
       .replace(/\[HINT:.*?\]/gi, '')
       .replace(/\[ANSWER:.*?\]/gi, '')
       .trim();
     setCurrentStep(cleaned);
     rafRef.current = null;
   }, []);
+
+  // Build a clean story summary from history for continuity
+  const buildStorySummary = useCallback(() => {
+    // history alternates: [action0, response0, action1, response1, ...]
+    // Take the last few exchanges and extract clean story text
+    const recentPairs = [];
+    for (let i = Math.max(0, history.length - 8); i < history.length; i += 2) {
+      const storyText = (history[i + 1] || '')
+        .replace(/\[QUESTION:.*?\]/gi, '')
+        .replace(/\[HINT:.*?\]/gi, '')
+        .replace(/\[ANSWER:.*?\]/gi, '')
+        .trim();
+      if (storyText) {
+        recentPairs.push(storyText);
+      }
+    }
+    return recentPairs.join(' \n');
+  }, [history]);
 
   // Trigger background prefetch so next story part is ready while user solves the puzzle
   const triggerPrefetch = useCallback(() => {
@@ -291,16 +312,15 @@ function StorySession({ student, useRag, onUpdateXP }: { student: Student, useRa
       body: JSON.stringify({
         studentId: student.id,
         useRag,
+        useThinking,
         context: {
           grade: student.grade,
           theme,
-          history: history.slice(-6).map((h, i) =>
-            i % 2 === 0 ? `Hero action: ${h}` : `Story: ${h}`
-          ).join('\n')
+          history: buildStorySummary()
         }
       })
     }).catch(() => { /* silent */ });
-  }, [student, useRag, theme, history]);
+  }, [student, useRag, useThinking, theme, history, buildStorySummary]);
 
   const generateStep = async (action: string) => {
     setIsLoading(true);
@@ -311,6 +331,9 @@ function StorySession({ student, useRag, onUpdateXP }: { student: Student, useRa
     setExpectedAnswer(null);
     setUserAnswer('');
     setFeedback('none');
+    setCurrentHint(null);
+    setCurrentQuestion(null);
+    setShowHint(false);
     streamTextRef.current = '';
     prefetchTriggered.current = false;
 
@@ -330,12 +353,11 @@ function StorySession({ student, useRag, onUpdateXP }: { student: Student, useRa
           studentId: student.id,
           userAction: action,
           useRag,
+          useThinking,
           context: {
             grade: student.grade,
             theme,
-            history: history.slice(-6).map((h, i) =>
-              i % 2 === 0 ? `Hero action: ${h}` : `Story: ${h}`
-            ).join('\n')
+            history: buildStorySummary()
           }
         })
       });
@@ -366,15 +388,18 @@ function StorySession({ student, useRag, onUpdateXP }: { student: Student, useRa
               setIsStreaming(false);
 
               const fullText = streamTextRef.current;
-              const match = fullText.match(/\[ANSWER:\s*([\w\/\.\-]+)\]/i);
+              const match = fullText.match(/\[ANSWER:\s*(.*?)\]/i);
               const hintMatch = fullText.match(/\[HINT:\s*(.*?)\]/i);
+              const questionMatch = fullText.match(/\[QUESTION:\s*(.*?)\]/i);
 
               if (match) {
                 setExpectedAnswer(match[1]);
                 setCurrentHint(hintMatch ? hintMatch[1] : null);
+                setCurrentQuestion(questionMatch ? questionMatch[1] : null);
                 setShowHint(false);
                 
                 const cleaned = fullText
+                  .replace(/\[QUESTION:.*?\]/gi, '')
                   .replace(/\[HINT:.*?\]/gi, '')
                   .replace(/\[ANSWER:.*?\]/gi, '')
                   .trim();
@@ -383,7 +408,7 @@ function StorySession({ student, useRag, onUpdateXP }: { student: Student, useRa
                 // Start prefetching next story part while user solves the puzzle
                 setTimeout(() => triggerPrefetch(), 500);
               } else {
-                setCurrentStep(fullText.replace(/\[HINT:.*?\]/gi, '').trim());
+                setCurrentStep(fullText.replace(/\[QUESTION:.*?\]/gi, '').replace(/\[HINT:.*?\]/gi, '').trim());
               }
               setHistory(prev => [...prev, action, fullText]);
             } else if (event.type === 'error') {
@@ -426,9 +451,10 @@ function StorySession({ student, useRag, onUpdateXP }: { student: Student, useRa
         setUserAnswer('');
         setExpectedAnswer(null);
         setCurrentHint(null);
+        setCurrentQuestion(null);
         setShowHint(false);
         // Auto-continue the story!
-        generateStep('The hero solved the puzzle and continues the adventure.');
+        generateStep('The hero solved the puzzle and continues onward.');
       }
     }, 2000);
   };
@@ -507,6 +533,13 @@ function StorySession({ student, useRag, onUpdateXP }: { student: Student, useRa
 
         {isAnswering && (
           <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="mt-12 p-8 bg-indigo-50 rounded-3xl border-2 border-indigo-100">
+            {currentQuestion && (
+              <div className="mb-6 p-5 bg-white rounded-2xl border-2 border-amber-200 shadow-sm">
+                <p className="font-bold text-lg text-amber-900 flex items-center gap-2">
+                  <span className="text-2xl">🧩</span> {currentQuestion}
+                </p>
+              </div>
+            )}
             <h3 className="font-bold text-indigo-900 mb-4 flex items-center gap-2">
               <Sparkles className="w-5 h-5" /> Quick! Solve the puzzle:
             </h3>
@@ -643,7 +676,7 @@ function StudentDashboard({ studentId, onBack }: { studentId: string; onBack: ()
   );
 }
 
-function OversightPanel({ studentId, useRag, setUseRag, onBack }: any) {
+function OversightPanel({ studentId, useRag, setUseRag, useThinking, setUseThinking, onBack }: any) {
   const [modelPerf, setModelPerf] = useState<ModelPerf[]>([]);
 
   useEffect(() => {
@@ -660,16 +693,32 @@ function OversightPanel({ studentId, useRag, setUseRag, onBack }: any) {
           <Button variant="secondary" onClick={onBack} className="gap-2">
             <ChevronRight className="w-5 h-5 rotate-180" /> Back to Story
           </Button>
-          <div className="flex items-center gap-3 bg-white p-2 rounded-2xl border border-slate-200 shadow-sm">
-            <span className="text-sm font-bold text-slate-500 px-3">RAG MODE</span>
-            <button
-              id="rag-toggle"
-              onClick={() => setUseRag(!useRag)}
-              className={`w-14 h-8 rounded-full relative transition-all ${useRag ? 'bg-indigo-500' : 'bg-slate-200'}`}
-            >
-              <div className={`absolute top-1 w-6 h-6 bg-white rounded-full transition-all ${useRag ? 'left-7' : 'left-1'}`} />
-            </button>
-          </div>
+        </div>
+      </div>
+
+      {/* Toggles Row */}
+      <div className="flex flex-wrap gap-4">
+        <div className="flex items-center gap-3 bg-white p-3 rounded-2xl border border-slate-200 shadow-sm">
+          <span className="text-sm font-bold text-slate-500 px-2">RAG MODE</span>
+          <button
+            id="rag-toggle"
+            onClick={() => setUseRag(!useRag)}
+            className={`w-14 h-8 rounded-full relative transition-all ${useRag ? 'bg-indigo-500' : 'bg-slate-200'}`}
+          >
+            <div className={`absolute top-1 w-6 h-6 bg-white rounded-full transition-all ${useRag ? 'left-7' : 'left-1'}`} />
+          </button>
+        </div>
+        <div className="flex items-center gap-3 bg-white p-3 rounded-2xl border border-slate-200 shadow-sm">
+          <span className="text-sm font-bold text-slate-500 px-2 flex items-center gap-1">
+            <Brain className="w-4 h-4" /> THINKING
+          </span>
+          <button
+            id="thinking-toggle"
+            onClick={() => setUseThinking(!useThinking)}
+            className={`w-14 h-8 rounded-full relative transition-all ${useThinking ? 'bg-amber-500' : 'bg-slate-200'}`}
+          >
+            <div className={`absolute top-1 w-6 h-6 bg-white rounded-full transition-all ${useThinking ? 'left-7' : 'left-1'}`} />
+          </button>
         </div>
       </div>
 
@@ -693,15 +742,22 @@ function OversightPanel({ studentId, useRag, setUseRag, onBack }: any) {
           <h3 className="font-bold text-lg mb-6 opacity-60 uppercase tracking-widest text-indigo-200">System Status</h3>
           <div className="space-y-6">
             <div className="flex justify-between items-center">
-              <span className="flex items-center gap-2 font-medium"><Sparkles className="w-5 h-5 text-amber-400" /> Model Status</span>
-              <span className="px-3 py-1 bg-green-400 text-green-950 font-bold rounded-lg text-sm">ACTIVE (CPU)</span>
+              <span className="flex items-center gap-2 font-medium"><Sparkles className="w-5 h-5 text-amber-400" /> Model</span>
+              <span className="px-3 py-1 bg-green-400 text-green-950 font-bold rounded-lg text-sm">Gemma 4 E2B</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="flex items-center gap-2 font-medium"><Brain className="w-5 h-5 text-amber-400" /> Thinking</span>
+              <span className={`px-3 py-1 font-bold rounded-lg text-sm ${useThinking ? 'bg-amber-400 text-amber-950' : 'bg-slate-600 text-slate-300'}`}>
+                {useThinking ? 'ON — Smarter, Slower' : 'OFF — Faster'}
+              </span>
             </div>
             <div className="flex justify-between items-center">
               <span className="flex items-center gap-2 font-medium"><Database className="w-5 h-5 text-amber-400" /> Database</span>
               <span className="px-3 py-1 bg-green-400 text-green-950 font-bold rounded-lg text-sm">OFFLINE-OK</span>
             </div>
             <div className="pt-4 border-t border-indigo-800">
-              <p className="text-sm opacity-70 mb-4 italic">RAG Mode is currently enhancing story coherence by injecting Grade-specific math curriculum data into prompts.</p>
+              <p className="text-sm opacity-70 mb-2 italic">RAG Mode injects Grade-specific math curriculum data into prompts.</p>
+              <p className="text-sm opacity-70 mb-4 italic">Thinking Mode lets the model reason step-by-step before responding. Turning it off makes stories generate faster but may reduce quality.</p>
               <Button variant="primary" className="w-full bg-amber-400 text-amber-950">Download Performance Report</Button>
             </div>
           </div>
